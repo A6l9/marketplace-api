@@ -44,6 +44,20 @@ class BaseInterface:
             for rec in rows_object:
                 await session.delete(rec)
             await session.commit()
+    
+    async def delete_row(self, model: Any, id: int):
+        async with self.async_ses() as session:
+            record = await session.execute(Query(model).where(model.id == id))
+            row = record.scalar()
+            if row:
+                try:
+                    await session.delete(row)
+                    await session.commit()
+                    return True
+                except Exception:
+                    pass
+            else:
+                return False
 
     async def delete_rows(self, model: Any, **filter_by):
         async with self.async_ses() as session:
@@ -154,6 +168,7 @@ class BaseInterface:
 
             try:
                 await session.commit()
+                
             except Exception as ex:
                 print(ex)
                 print(f'failed update {model.__tablename__}')
@@ -176,6 +191,7 @@ class BaseInterface:
                 logger.exception(exc)
 
     async def get_goods_filter(self, goods_filter: GoodsFilter) -> list:
+        goods_filter.currency = None
         query_filter = goods_filter.filter(select(Goods))
         async with self.async_ses() as session:
             row = await session.execute(query_filter)

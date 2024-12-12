@@ -1,19 +1,50 @@
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator
 
 
-class RequestGoodsModel(BaseModel):
+class RequestGoodsByIdModel(BaseModel):
     
-    min_pice: int = Field(alias='min_pice')
-    max_pice: int = Field(alias='max_pice')
-    category: str = Field(alias='category')
-    currency: int = Field(alias='currency') 
+    id: int = Field(alias='id')
+    currency: str = Field(alias='currency') 
 
-
+    
+    @field_validator('currency', mode='before')
     @classmethod
-    @model_validator(mode='before')
-    def check_parameters(cls, values: dict) -> dict:
-        if not values['price']:
-            raise ValueError('The price is a required parameter')
-        if not values['goods_name']:
-            raise ValueError('The goods_name is a required parameter')
+    def check_currency(cls, value: str) -> str:
+        if value.upper() not in ['USD', 'RUB']:
+            raise ValueError('The currency must be either USD or RUB')
+        return value.upper()
+
+
+class RequestAddGoodsModel(BaseModel):
+
+    name: str = Field(alias='name')
+    description: str = Field(alias='description')
+    category: str = Field(alias='category')
+    price :float = Field(alias='price')   
+    currency: str = Field(alias='currency') 
+
+    
+    @field_validator('currency', mode='before')
+    @classmethod
+    def check_currency(cls, value: str) -> str:
+        if value.upper() not in ['USD', 'RUB']:
+            raise ValueError('The currency must be either USD or RUB')
+        return value.upper()
+
+
+class RequestUpdateGoodsModel(BaseModel):
+
+    name: str = Field(alias='name')
+    description: str = Field(alias='description')
+    category: str = Field(alias='category')
+    price :float = Field(alias='price')   
+    currency: str = Field(alias='currency') 
+
+    
+    @field_validator('currency', mode='before')
+    @classmethod
+    def check_currency(cls, value: str) -> str:
+        if value.upper() not in ['USD', 'RUB']:
+            raise ValueError('The currency must be either USD or RUB')
+        return value.upper()
     

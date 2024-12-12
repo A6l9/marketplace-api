@@ -1,5 +1,4 @@
 import aiohttp
-import pendulum
 import asyncio
 from loguru import logger
 import json
@@ -29,18 +28,8 @@ class Parser:
                 except Exception as exc:
                     logger.exception(exc)
 
-            today = pendulum.now(tz='UTC')
-            collection_time = pendulum.datetime(year=today.year, 
-                                                month=today.month, 
-                                                day=today.day + 1,
-                                                hour=9, 
-                                                minute=0,
-                                                second=0,
-                                                microsecond=0,
-                                                tz='UTC')
-            sleep_duration = collection_time.diff(today)
-            logger.info(f'Going to sleep for {sleep_duration.hours} hours')
-            await asyncio.sleep(sleep_duration.seconds)
+            logger.info(f'Going to sleep for {1} hour')
+            await asyncio.sleep(3600)
 
 
 async def main():
