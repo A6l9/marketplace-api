@@ -22,5 +22,6 @@ async def lifespan(app: FastAPI):
 
 
 root_app = FastAPI(lifespan=lifespan)
+
 root_app.mount('/api/v1', app)
 app.include_router(api_router, tags=['Routes'])

@@ -45,7 +45,7 @@ class BaseInterface:
                 await session.delete(rec)
             await session.commit()
     
-    async def delete_row(self, model: Any, id: int):
+    async def delete_row(self, model: Any, id: int) -> bool:
         async with self.async_ses() as session:
             record = await session.execute(Query(model).where(model.id == id))
             row = record.scalar()
@@ -59,7 +59,7 @@ class BaseInterface:
             else:
                 return False
 
-    async def delete_rows(self, model: Any, **filter_by):
+    async def delete_rows(self, model: Any, **filter_by) -> bool:
         async with self.async_ses() as session:
             records = await session.execute(Query(model).filter_by(**filter_by))
             res = records.scalars()
@@ -84,7 +84,7 @@ class BaseInterface:
             rows = await session.execute(Select(table_model.__table__.c[field]))
             return {row for row in rows.scalars()}
 
-    async def drop_tables(self, table_models: Iterable):
+    async def drop_tables(self, table_models: Iterable) -> None:
         """
         Метод принимает коллекцию классов моделей и удаляет данные таблицы из БД.
         :param table_models:
@@ -191,7 +191,9 @@ class BaseInterface:
                 logger.exception(exc)
 
     async def get_goods_filter(self, goods_filter: GoodsFilter) -> list:
-        goods_filter.currency = None
+        """
+        The method filters out rows from the database according to the specified parameters
+        """
         query_filter = goods_filter.filter(select(Goods))
         async with self.async_ses() as session:
             row = await session.execute(query_filter)

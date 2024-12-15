@@ -1,5 +1,6 @@
 import pendulum
 from database.initial import db
+from fastapi import Query
 from database.models import Goods
 from pydantic_core import ValidationError
 from starlette.responses import JSONResponse, Response
@@ -7,17 +8,27 @@ from api.filters.projects_filters import GoodsFilter
 from api.initial import api_router
 from fastapi_filter import FilterDepends
 from api.api_tools.tools_data_conversion import data_conversion
-from api.models.requests_models import RequestGoodsByIdModel, RequestAddGoodsModel, RequestUpdateGoodsModel
+from api.models.requests_models import RequestGoodsByIdModel, RequestAddGoodsModel, RequestUpdateGoodsModel, CurrencyModel
 from api.models.response_models import GoodsResponceModel, GoodsByIdResponceModel, GoodsAddResponceModel, GoodsUpdateResponceModel
 
 
 
 @api_router.get('/products', response_model=GoodsResponceModel, status_code=200)
-async def get_products(product_filter: GoodsFilter=FilterDepends(GoodsFilter)) -> dict:
-    currency = product_filter.currency
+async def get_products(currency: str | None="RUB", 
+                       price_min: float | None=None, price_max: float | None=None,
+                       product_filter: GoodsFilter=FilterDepends(GoodsFilter),
+                       page: int = Query(1, gt=0), size: int = Query(10, gt=0, le=50)) -> dict:
+    try:
+        data = CurrencyModel(currency=currency, price_min=price_min, price_max=price_max)
+    except ValidationError as e:
+        return JSONResponse({"data": {'error': str(e)}}, status_code=400)
     goods = await db.get_goods_filter(product_filter)
     if goods:
-        goods = {"data": [await data_conversion(i.get_data(), valute=currency) for i in goods]}
+        start_index = (page - 1) * size
+        end_index = page * size
+        goods = {"page": page, "size": size, "total": len(goods),
+                "data": await data_conversion(goods[start_index:end_index], valute=data.currency,
+                                              price_min=data.price_min, price_max=data.price_max)}
     else:
         goods = {"data": []}
     return JSONResponse(content=goods, status_code=200)
@@ -65,6 +76,6 @@ async def update_product(id: int, product: RequestUpdateGoodsModel) -> dict:
 
 @api_router.delete('/products/', status_code=204)
 async def delete_product(id: int):
-    result = await db.delete_row(Goods, id=id)
+    await db.delete_row(Goods, id=id)
     return Response(status_code=204)
     

@@ -8,7 +8,7 @@ from misc.initial import tmp_storage
 class Parser:
 
     def __init__(self):
-        self.url = 'https://www.cbr-xml-daily.ru/daily_json.js'
+        self.url: str = 'https://www.cbr-xml-daily.ru/daily_json.js'
     
     async def start(self):
         while True:

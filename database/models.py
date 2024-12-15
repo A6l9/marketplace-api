@@ -39,3 +39,4 @@ class Goods(Base):
             'date_of_adding': str(self.date_of_adding),
             'date_of_updating': str(self.date_of_updating)
         }
+    

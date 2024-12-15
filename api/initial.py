@@ -1,5 +1,5 @@
 from fastapi import FastAPI, APIRouter
 
 
-app = FastAPI(title='Test Fast API App')
+app = FastAPI(title='Marketplace API')
 api_router = APIRouter()

@@ -13,8 +13,15 @@ class GoodsResponceModel(BaseModel):
         currency: str = Field(alias='currency')
         date_of_adding: str = Field(alias='date_of_adding')
         date_of_updating: str = Field(alias='date_of_updating')
+    
+    class Error(BaseModel):
+        error: str
 
-    data: list[Item] | list[None]
+    page: int
+    size: int
+    total: int
+    data: list[Item] | list[None] | Error
+
 
 class GoodsByIdResponceModel(BaseModel):
     class Item(BaseModel):
